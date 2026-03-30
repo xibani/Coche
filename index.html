@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Financiación Coche</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0f14;
+  --surface: #141820;
+  --surface-2: #1a1f2a;
+  --surface-3: #222836;
+  --border: #2a3040;
+  --border-light: #343c50;
+  --text: #e8eaf0;
+  --text-dim: #8a90a0;
+  --text-muted: #5a6070;
+  --accent: #3b82f6;
+  --accent-dim: #2563eb;
+  --accent-glow: rgba(59, 130, 246, 0.15);
+  --green: #22c55e;
+  --green-dim: rgba(34, 197, 94, 0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239, 68, 68, 0.1);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245, 158, 11, 0.1);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* Header */
+.header {
+  padding: 2rem 1.5rem 1rem;
+  text-align: center;
+  position: relative;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.header p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-header .icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.card-header .icon.blue { background: var(--accent-glow); color: var(--accent); }
+.card-header .icon.green { background: var(--green-dim); color: var(--green); }
+.card-header .icon.amber { background: var(--amber-dim); color: var(--amber); }
+.card-header .icon.red { background: var(--red-dim); color: var(--red); }
+
+.card-header h2 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.card-body { padding: 1.25rem; }
+
+/* Inputs */
+.field {
+  margin-bottom: 1rem;
+}
+
+.field:last-child { margin-bottom: 0; }
+
+.field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field input, .field select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.field input:focus, .field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.field select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238a90a0' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  padding-right: 2rem;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+/* Toggle */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.toggle-row span {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.toggle input { opacity: 0; width: 0; height: 0; }
+
+.toggle .slider {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-3);
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  transition: 0.2s;
+}
+
+.toggle .slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  left: 2px;
+  top: 2px;
+  transition: 0.2s;
+}
+
+.toggle input:checked + .slider {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+.toggle input:checked + .slider::before {
+  transform: translateX(18px);
+  background: var(--accent);
+}
+
+/* Stat boxes */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.stat-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+}
+
+.stat-box.full { grid-column: 1 / -1; }
+
+.stat-box .label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.3rem;
+}
+
+.stat-box .value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stat-box .value.green { color: var(--green); }
+.stat-box .value.red { color: var(--red); }
+.stat-box .value.amber { color: var(--amber); }
+.stat-box .value.accent { color: var(--accent); }
+
+.stat-box .sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+/* Ahorro plan */
+.plan-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  margin-top: 0.75rem;
+}
+
+.plan-box h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.plan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  font-size: 0.8rem;
+}
+
+.plan-row .plan-label { color: var(--text-dim); }
+.plan-row .plan-value { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+
+/* Progress bar */
+.progress-wrapper { margin-top: 0.75rem; }
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--surface-3);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+}
+
+/* Table */
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+thead th {
+  padding: 0.7rem 0.6rem;
+  text-align: right;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+thead th:first-child { text-align: center; }
+
+tbody td {
+  padding: 0.55rem 0.6rem;
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+tbody td:first-child {
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+tbody tr:hover { background: var(--surface-2); }
+
+tbody tr.highlight {
+  background: var(--accent-glow);
+}
+
+tbody tr.highlight td {
+  color: var(--text);
+  font-weight: 500;
+}
+
+tbody tr.highlight td:first-child { color: var(--accent); }
+
+/* Cancel column highlight */
+tbody td.cancel-col { color: var(--amber); }
+
+/* Responsive scroll for table */
+.table-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  padding: 0.7rem 1.25rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: 0.2s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+}
+
+.tab:hover { color: var(--text-dim); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Comparison bar */
+.compare-bars { margin-top: 0.75rem; }
+
+.compare-item {
+  margin-bottom: 0.85rem;
+}
+
+.compare-item:last-child { margin-bottom: 0; }
+
+.compare-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.compare-label span:first-child {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.compare-label span:last-child {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.compare-bar {
+  width: 100%;
+  height: 24px;
+  background: var(--surface-3);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.compare-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 0.5rem;
+}
+
+.compare-fill.blue { background: rgba(59,130,246,0.25); }
+.compare-fill.green { background: rgba(34,197,94,0.2); }
+.compare-fill.amber { background: rgba(245,158,11,0.2); }
+
+/* Section title */
+.section-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 1.25rem 0 0.75rem;
+}
+
+.section-title:first-child { margin-top: 0; }
+
+/* Info banner */
+.info-banner {
+  background: var(--accent-glow);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.info-banner strong { color: var(--accent); }
+
+/* Right column */
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card { animation: fadeIn 0.4s ease both; }
+.card:nth-child(2) { animation-delay: 0.05s; }
+.card:nth-child(3) { animation-delay: 0.1s; }
+
+/* Tiny badge */
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge.green { background: var(--green-dim); color: var(--green); }
+.badge.red { background: var(--red-dim); color: var(--red); }
+.badge.amber { background: var(--amber-dim); color: var(--amber); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Calculadora de Financiación</h1>
+  <p>Sistema francés · Simulación de cancelación anticipada</p>
+</div>
+
+<div class="container">
+  <div class="grid">
+
+    <!-- LEFT: Inputs -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon blue">🚗</div>
+          <h2>Datos del vehículo</h2>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Precio al contado</label>
+            <input type="number" id="precioContado" value="24550" step="50">
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label>Dto. web (%)</label>
+              <input type="number" id="dtoWeb" value="10" step="1" min="0" max="50">
+            </div>
+            <div class="field">
+              <label>Dto. negociación (%)</label>
+              <input type="number" id="dtoNeg" value="10" step="1" min="0" max="50">
+            </div>
+          </div>
+          <div class="field">
+            <label>Descuento aplicado (€)</label>
+            <input type="number" id="descuento" value="1550" step="50">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon green">💰</div>
+          <h2>Financiación</h2>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Entrada total (€)</label>
+            <input type="number" id="entrada" value="7500" step="100">
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label>Transferencia (€)</label>
+              <input type="number" id="transferencia" value="200" step="50">
+            </div>
+            <div class="field">
+              <label>Garantía ampliada (€)</label>
+              <input type="number" id="garantia" value="750" step="50">
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label>Interés anual (%)</label>
+              <input type="number" id="interes" value="9.99" step="0.01" min="0" max="30">
+            </div>
+            <div class="field">
+              <label>Plazo (meses)</label>
+              <select id="plazo">
+                <option value="12">12 meses</option>
+                <option value="24">24 meses</option>
+                <option value="36">36 meses</option>
+                <option value="48">48 meses</option>
+                <option value="60">60 meses</option>
+                <option value="72" selected>72 meses</option>
+                <option value="84">84 meses</option>
+                <option value="96">96 meses</option>
+                <option value="108">108 meses</option>
+                <option value="120">120 meses</option>
+              </select>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <span>Seguro de vida</span>
+            <label class="toggle">
+              <input type="checkbox" id="seguroVida">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon amber">⚡</div>
+          <h2>Cancelación anticipada</h2>
+        </div>
+        <div class="card-body">
+          <div class="input-row">
+            <div class="field">
+              <label>Mes de cancelación</label>
+              <input type="number" id="mesCancelacion" value="18" min="1" max="120">
+            </div>
+            <div class="field">
+              <label>Penalización (%)</label>
+              <input type="number" id="penalizacion" value="1" step="0.1" min="0" max="10">
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="toggle-row">
+            <span>Coche como parte de entrada</span>
+            <label class="toggle">
+              <input type="checkbox" id="cocheEntrada">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="cocheFields" style="display:none; margin-top:0.75rem;">
+            <div class="field">
+              <label>Valor del coche entregado (€)</label>
+              <input type="number" id="valorCoche" value="3500" step="100">
+            </div>
+            <div class="field">
+              <label>Dinero que tenías previsto (€)</label>
+              <input type="number" id="dineroPrevisto" value="12500" step="100">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="right-col">
+
+      <!-- Summary Cards -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon blue">📊</div>
+          <h2>Resumen de la operación</h2>
+        </div>
+        <div class="card-body">
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="label">Precio final cliente</div>
+              <div class="value" id="precioFinal">23.000 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Total a financiar</div>
+              <div class="value accent" id="totalFinanciar">16.250 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Cuota mensual</div>
+              <div class="value" id="cuotaMensual">312,85 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Total si completas</div>
+              <div class="value red" id="totalCompleto">30.225,20 €</div>
+            </div>
+          </div>
+
+          <div class="section-title">Cancelación anticipada</div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="label">Capital pendiente</div>
+              <div class="value" id="capitalPendiente">13.161 €</div>
+              <div class="sub" id="capitalSub">mes 18</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Penalización</div>
+              <div class="value amber" id="penalizacionVal">131,61 €</div>
+              <div class="sub">1%</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Importe para cancelar</div>
+              <div class="value amber" id="importeCancelar">13.292,60 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Total real pagado</div>
+              <div class="value green" id="totalCancelando">26.623,90 €</div>
+            </div>
+          </div>
+
+          <div class="compare-bars" style="margin-top:1.25rem;">
+            <div class="compare-item">
+              <div class="compare-label">
+                <span>Cancelando en mes <span id="mesLabel">18</span></span>
+                <span id="barCancel" style="color:var(--green)">26.623,90 €</span>
+              </div>
+              <div class="compare-bar">
+                <div class="compare-fill green" id="barCancelFill" style="width:88%"></div>
+              </div>
+            </div>
+            <div class="compare-item">
+              <div class="compare-label">
+                <span>Pagando los <span id="plazoLabel">72</span> meses</span>
+                <span id="barFull" style="color:var(--text-dim)">30.225,20 €</span>
+              </div>
+              <div class="compare-bar">
+                <div class="compare-fill blue" id="barFullFill" style="width:100%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="plan-box" style="margin-top:1rem;">
+            <div class="compare-label">
+              <span style="font-size:0.78rem; font-weight:600; color:var(--green);">Ahorro estimado cancelando</span>
+              <span class="badge green" id="ahorroTotal">3.601,30 €</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan de ahorro (coche como entrada) -->
+      <div class="card" id="planAhorroCard" style="display:none;">
+        <div class="card-header">
+          <div class="icon green">🎯</div>
+          <h2>Plan de ahorro para cancelar</h2>
+        </div>
+        <div class="card-body">
+          <div class="info-banner">
+            Si tu coche vale <strong id="cocheValBanner">3.500 €</strong> y la entrada máxima es <strong id="entradaMaxBanner">7.500 €</strong>, solo pones <strong id="efectivoBanner">4.000 €</strong> en efectivo. El dinero que te sobra de los <strong id="previstoValBanner">12.500 €</strong> lo guardas para cancelar.
+          </div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="label">Efectivo al firmar</div>
+              <div class="value" id="efectivoFirma">4.000 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Dinero reservado desde el día 1</div>
+              <div class="value accent" id="dineroReservado">8.500 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Faltante para cancelar</div>
+              <div class="value amber" id="faltante">4.792,60 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Ahorro mensual necesario</div>
+              <div class="value green" id="ahorroMensual">266,26 €</div>
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="plan-box">
+            <h4>Esfuerzo mensual total</h4>
+            <div class="plan-row">
+              <span class="plan-label">Cuota financiación</span>
+              <span class="plan-value" id="planCuota">312,85 €</span>
+            </div>
+            <div class="plan-row">
+              <span class="plan-label">Ahorro para cancelar</span>
+              <span class="plan-value" id="planAhorro" style="color:var(--green)">266,26 €</span>
+            </div>
+            <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
+              <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual</span>
+              <span class="plan-value" style="color:var(--accent); font-size:0.95rem;" id="planTotal">579,11 €</span>
+            </div>
+          </div>
+          <div class="progress-wrapper">
+            <div class="progress-label">
+              <span>Reservado al inicio</span>
+              <span id="progressPct">63.9%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill" style="width:63.9%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amortization table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon blue">📋</div>
+          <h2>Tabla de amortización</h2>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Cuota</th>
+                <th>Interés</th>
+                <th>Capital</th>
+                <th>Pendiente</th>
+                <th>Cancelar</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Simulación orientativa · Los importes exactos pueden variar según las condiciones del contrato
+</div>
+
+<script>
+function fmt(n) {
+  return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+function calcular() {
+  const precioContado = +document.getElementById('precioContado').value;
+  const dtoWeb = +document.getElementById('dtoWeb').value;
+  const dtoNeg = +document.getElementById('dtoNeg').value;
+  const descuento = +document.getElementById('descuento').value;
+  const entrada = +document.getElementById('entrada').value;
+  const transferencia = +document.getElementById('transferencia').value;
+  const garantia = +document.getElementById('garantia').value;
+  const interesAnual = +document.getElementById('interes').value;
+  const plazo = +document.getElementById('plazo').value;
+  const seguroVida = document.getElementById('seguroVida').checked;
+  const mesCancelacion = Math.min(+document.getElementById('mesCancelacion').value, plazo);
+  const penPct = +document.getElementById('penalizacion').value;
+  const cocheEntrada = document.getElementById('cocheEntrada').checked;
+  const valorCoche = +document.getElementById('valorCoche').value;
+  const dineroPrevisto = +document.getElementById('dineroPrevisto').value;
+
+  document.getElementById('mesCancelacion').max = plazo;
+
+  // Price calc
+  const precioFinal = precioContado - descuento + transferencia;
+  const totalFinanciar = precioFinal - entrada;
+
+  // Monthly rate
+  const r = interesAnual / 100 / 12;
+  const n = plazo;
+
+  // Cuota (French system)
+  let cuota;
+  if (r === 0) {
+    cuota = totalFinanciar / n;
+  } else {
+    cuota = totalFinanciar * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+  }
+
+  // If seguro de vida, add approximate difference
+  const cuotaBase = cuota;
+  if (seguroVida) {
+    // Approximate: from the image, 72mo with insurance is 327.93, without 312.85
+    // Difference ratio ≈ 327.93/312.85 = 1.04826
+    cuota = cuota * 1.04826;
+  }
+
+  // Total if complete
+  const totalCompleto = entrada + transferencia + cuota * n;
+
+  // Amortization schedule
+  let balance = totalFinanciar;
+  const schedule = [];
+  let totalIntereses = 0;
+  let totalCapital = 0;
+
+  for (let m = 1; m <= n; m++) {
+    const interesMes = balance * r;
+    const capitalMes = cuota - interesMes;
+    balance -= capitalMes;
+    if (balance < 0) balance = 0;
+    totalIntereses += interesMes;
+    totalCapital += capitalMes;
+
+    const pen = balance * (penPct / 100);
+    const cancelar = balance + pen;
+
+    schedule.push({
+      mes: m,
+      cuota: cuota,
+      interes: interesMes,
+      capital: capitalMes,
+      pendiente: balance,
+      penalizacion: pen,
+      cancelar: cancelar
+    });
+  }
+
+  // Cancelación values
+  const cancelData = schedule[mesCancelacion - 1];
+  const cuotasPagadas = cuota * mesCancelacion;
+  const totalCancelando = entrada + transferencia + cuotasPagadas + cancelData.cancelar;
+  const ahorro = totalCompleto - totalCancelando;
+
+  // Update DOM
+  document.getElementById('precioFinal').textContent = fmt(precioFinal);
+  document.getElementById('totalFinanciar').textContent = fmt(totalFinanciar);
+  document.getElementById('cuotaMensual').textContent = fmt(cuota);
+  document.getElementById('totalCompleto').textContent = fmt(totalCompleto);
+  document.getElementById('capitalPendiente').textContent = fmt(cancelData.pendiente);
+  document.getElementById('capitalSub').textContent = 'mes ' + mesCancelacion;
+  document.getElementById('penalizacionVal').textContent = fmt(cancelData.penalizacion);
+  document.getElementById('importeCancelar').textContent = fmt(cancelData.cancelar);
+  document.getElementById('totalCancelando').textContent = fmt(totalCancelando);
+  document.getElementById('ahorroTotal').textContent = fmt(ahorro);
+  document.getElementById('mesLabel').textContent = mesCancelacion;
+  document.getElementById('plazoLabel').textContent = plazo;
+  document.getElementById('barCancel').textContent = fmt(totalCancelando);
+  document.getElementById('barFull').textContent = fmt(totalCompleto);
+
+  const pctCancel = (totalCancelando / totalCompleto) * 100;
+  document.getElementById('barCancelFill').style.width = pctCancel + '%';
+  document.getElementById('barFullFill').style.width = '100%';
+
+  // Plan de ahorro (coche como entrada)
+  const planCard = document.getElementById('planAhorroCard');
+  const cocheFieldsDiv = document.getElementById('cocheFields');
+
+  if (cocheEntrada) {
+    cocheFieldsDiv.style.display = 'block';
+    planCard.style.display = '';
+
+    const efectivo = entrada - valorCoche;
+    const sobrante = dineroPrevisto - efectivo;
+    const faltante = cancelData.cancelar - sobrante;
+    const ahorroMes = faltante > 0 ? faltante / mesCancelacion : 0;
+    const totalMes = cuota + ahorroMes;
+    const pctReservado = (sobrante / cancelData.cancelar) * 100;
+
+    document.getElementById('cocheValBanner').textContent = fmt(valorCoche);
+    document.getElementById('entradaMaxBanner').textContent = fmt(entrada);
+    document.getElementById('efectivoBanner').textContent = fmt(efectivo);
+    document.getElementById('previstoValBanner').textContent = fmt(dineroPrevisto);
+    document.getElementById('efectivoFirma').textContent = fmt(efectivo);
+    document.getElementById('dineroReservado').textContent = fmt(sobrante);
+    document.getElementById('faltante').textContent = fmt(Math.max(0, faltante));
+    document.getElementById('ahorroMensual').textContent = fmt(Math.max(0, ahorroMes));
+    document.getElementById('planCuota').textContent = fmt(cuota);
+    document.getElementById('planAhorro').textContent = fmt(Math.max(0, ahorroMes));
+    document.getElementById('planTotal').textContent = fmt(totalMes);
+    document.getElementById('progressPct').textContent = Math.min(100, pctReservado).toFixed(1) + '%';
+    document.getElementById('progressFill').style.width = Math.min(100, pctReservado).toFixed(1) + '%';
+  } else {
+    cocheFieldsDiv.style.display = 'none';
+    planCard.style.display = 'none';
+  }
+
+  // Table
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  for (const row of schedule) {
+    const tr = document.createElement('tr');
+    if (row.mes === mesCancelacion) tr.classList.add('highlight');
+
+    tr.innerHTML = `
+      <td>${row.mes}</td>
+      <td>${fmt(row.cuota)}</td>
+      <td>${fmt(row.interes)}</td>
+      <td>${fmt(row.capital)}</td>
+      <td>${fmt(row.pendiente)}</td>
+      <td class="cancel-col">${fmt(row.cancelar)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  // Scroll to highlighted row after rendering
+  setTimeout(() => {
+    const highlighted = tbody.querySelector('.highlight');
+    if (highlighted) {
+      highlighted.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }, 100);
+}
+
+// Event listeners
+const inputs = document.querySelectorAll('input, select');
+inputs.forEach(input => {
+  input.addEventListener('input', calcular);
+  input.addEventListener('change', calcular);
+});
+
+// Initial calculation
+calcular();
+</script>
+
+</body>
+</html>
