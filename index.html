@@ -639,6 +639,20 @@ tbody td.cancel-col { color: var(--amber); }
               <span class="slider"></span>
             </label>
           </div>
+          <hr class="divider">
+          <div class="toggle-row">
+            <span>Usar cuota real del concesionario</span>
+            <label class="toggle">
+              <input type="checkbox" id="usarCuotaReal" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="cuotaRealField" style="margin-top:0.5rem;">
+            <div class="field">
+              <label>Cuota mensual real (€)</label>
+              <input type="number" id="cuotaReal" value="312.85" step="0.01">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -874,27 +888,58 @@ function calcular() {
   document.getElementById('mesCancelacion').max = plazo;
 
   // Price calc
-  const precioFinal = precioContado - descuento + transferencia;
-  const totalFinanciar = precioFinal - entrada;
+  const precioFinal = precioContado - descuento; // 23.000 €
+  const totalFinanciar = precioFinal - entrada + garantia; // 23.000 - 7.500 + 750 = 16.250 €
+
+  const usarCuotaReal = document.getElementById('usarCuotaReal').checked;
+  const cuotaRealInput = +document.getElementById('cuotaReal').value;
+
+  // Show/hide cuota real field
+  document.getElementById('cuotaRealField').style.display = usarCuotaReal ? 'block' : 'none';
 
   // Monthly rate
-  const r = interesAnual / 100 / 12;
+  let r = interesAnual / 100 / 12;
   const n = plazo;
 
   // Cuota (French system)
   let cuota;
-  if (r === 0) {
-    cuota = totalFinanciar / n;
-  } else {
-    cuota = totalFinanciar * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-  }
 
-  // If seguro de vida, add approximate difference
-  const cuotaBase = cuota;
-  if (seguroVida) {
-    // Approximate: from the image, 72mo with insurance is 327.93, without 312.85
-    // Difference ratio ≈ 327.93/312.85 = 1.04826
-    cuota = cuota * 1.04826;
+  if (usarCuotaReal && cuotaRealInput > 0) {
+    // Use the dealer's real cuota
+    cuota = cuotaRealInput;
+    if (seguroVida) {
+      cuota = cuotaRealInput * (327.93 / 312.85);
+    }
+    // Back-calculate effective monthly rate via Newton's method
+    // so the amortization table is consistent
+    if (totalFinanciar > 0) {
+      let rEff = r > 0 ? r : 0.005; // initial guess
+      for (let i = 0; i < 100; i++) {
+        const pwr = Math.pow(1 + rEff, n);
+        const f = totalFinanciar * (rEff * pwr) / (pwr - 1) - cuota;
+        // derivative
+        const dpwr = n * Math.pow(1 + rEff, n - 1);
+        const num = rEff * pwr;
+        const den = pwr - 1;
+        const dnum = pwr + rEff * dpwr;
+        const dden = dpwr;
+        const df = totalFinanciar * (dnum * den - num * dden) / (den * den);
+        if (Math.abs(df) < 1e-12) break;
+        rEff = rEff - f / df;
+        if (rEff < 0) rEff = 0.0001;
+        if (Math.abs(f) < 0.001) break;
+      }
+      r = rEff;
+    }
+  } else {
+    if (r === 0) {
+      cuota = totalFinanciar / n;
+    } else {
+      cuota = totalFinanciar * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    }
+    if (seguroVida) {
+      cuota = cuota * (327.93 / 312.85);
+    }
   }
 
   // Total if complete
