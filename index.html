@@ -681,6 +681,7 @@ tbody td.cancel-col { color: var(--amber); }
                 <option value="24">24 meses</option>
                 <option value="36">36 meses</option>
                 <option value="48">48 meses</option>
+                <option value="49">49 meses</option>
                 <option value="60">60 meses</option>
                 <option value="72" selected>72 meses</option>
                 <option value="84">84 meses</option>
@@ -755,16 +756,6 @@ tbody td.cancel-col { color: var(--amber); }
             </div>
           </div>
           <hr class="divider">
-          <div class="stats-grid" style="margin-bottom:1rem;">
-            <div class="stat-box">
-              <div class="label">Intereses pagados</div>
-              <div class="value red" id="interesesPagados" style="font-size:0.95rem;">0,00 €</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Capital amortizado</div>
-              <div class="value green" id="capitalAmortizado" style="font-size:0.95rem;">0,00 €</div>
-            </div>
-          </div>
           <div class="field">
             <label>Dinero que tenías previsto como entrada (€)</label>
             <input type="number" id="dineroPrevisto" value="12500" step="100">
@@ -857,7 +848,7 @@ tbody td.cancel-col { color: var(--amber); }
         </div>
       </div>
 
-      <!-- Summary Cards (después del plan, usa datos del plan) -->
+      <!-- Summary Cards -->
       <div class="card">
         <div class="card-header">
           <div class="icon blue">📊</div>
@@ -877,13 +868,46 @@ tbody td.cancel-col { color: var(--amber); }
               <div class="label">Cuota mensual</div>
               <div class="value" id="cuotaMensual">312,85 €</div>
             </div>
+          </div>
+
+          <!-- Si completas la financiación -->
+          <div class="section-title">Si completas la financiación (<span id="plazoResumen">72</span> meses)</div>
+          <div class="stats-grid">
             <div class="stat-box">
-              <div class="label">Total si completas</div>
+              <div class="label">Total pagado</div>
               <div class="value red" id="totalCompleto">30.225,20 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Capital (el coche)</div>
+              <div class="value" id="desgloseCompletoCoche">16.250 €</div>
+              <div class="sub">lo que pagas por el coche</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Intereses totales</div>
+              <div class="value red" id="desgloseCompletoInteres">6.275 €</div>
+              <div class="sub">coste de la financiación</div>
             </div>
           </div>
 
-          <div class="section-title">Cancelación anticipada</div>
+          <!-- Si cancelas anticipadamente -->
+          <div class="section-title">Si cancelas en el mes <span id="mesLabel">18</span></div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="label">Cuotas pagadas</div>
+              <div class="value" id="cuotasPagadasVal">5.631 €</div>
+              <div class="sub" id="cuotasPagadasSub">18 × 312,85 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Capital amortizado</div>
+              <div class="value green" id="capitalAmortizado">3.089 €</div>
+              <div class="sub">pagado del coche</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Intereses pagados</div>
+              <div class="value red" id="interesesPagados">2.542 €</div>
+              <div class="sub">coste financiación</div>
+            </div>
+          </div>
           <div class="stats-grid">
             <div class="stat-box">
               <div class="label">Capital pendiente</div>
@@ -908,7 +932,7 @@ tbody td.cancel-col { color: var(--amber); }
           <div class="compare-bars" style="margin-top:1.25rem;">
             <div class="compare-item">
               <div class="compare-label">
-                <span>Cancelando en mes <span id="mesLabel">18</span></span>
+                <span>Cancelando en mes <span id="mesLabel2">18</span></span>
                 <span id="barCancel" style="color:var(--green)">26.623,90 €</span>
               </div>
               <div class="compare-bar">
@@ -1028,26 +1052,21 @@ function calcular() {
     if (seguroVida) {
       cuota = cuotaRealInput * (327.93 / 312.85);
     }
-    // Back-calculate effective monthly rate via Newton's method
+    // Back-calculate effective monthly rate via bisection
     // so the amortization table is consistent
-    if (totalFinanciar > 0) {
-      let rEff = r > 0 ? r : 0.005; // initial guess
-      for (let i = 0; i < 100; i++) {
-        const pwr = Math.pow(1 + rEff, n);
-        const f = totalFinanciar * (rEff * pwr) / (pwr - 1) - cuota;
-        // derivative
-        const dpwr = n * Math.pow(1 + rEff, n - 1);
-        const num = rEff * pwr;
-        const den = pwr - 1;
-        const dnum = pwr + rEff * dpwr;
-        const dden = dpwr;
-        const df = totalFinanciar * (dnum * den - num * dden) / (den * den);
-        if (Math.abs(df) < 1e-12) break;
-        rEff = rEff - f / df;
-        if (rEff < 0) rEff = 0.0001;
-        if (Math.abs(f) < 0.001) break;
+    if (totalFinanciar > 0 && cuota > totalFinanciar / n) {
+      let lo = 1e-10, hi = 1.0;
+      for (let i = 0; i < 200; i++) {
+        const mid = (lo + hi) / 2;
+        const pwr = Math.pow(1 + mid, n);
+        const payment = totalFinanciar * (mid * pwr) / (pwr - 1);
+        if (payment < cuota) lo = mid;
+        else hi = mid;
+        if (hi - lo < 1e-12) break;
       }
-      r = rEff;
+      r = (lo + hi) / 2;
+    } else if (totalFinanciar > 0) {
+      r = 0;
     }
   } else {
     if (r === 0) {
@@ -1126,12 +1145,21 @@ function calcular() {
   }
 
   // Update DOM
-  document.getElementById('interesesPagados').textContent = fmt(interesesPagadosTotal);
-  document.getElementById('capitalAmortizado').textContent = fmt(capitalAmortizadoTotal);
   document.getElementById('precioFinal').textContent = fmt(precioFinal);
   document.getElementById('totalFinanciar').textContent = fmt(totalFinanciar);
   document.getElementById('cuotaMensual').textContent = fmt(cuota);
+
+  // Si completas la financiación
+  document.getElementById('plazoResumen').textContent = plazo;
   document.getElementById('totalCompleto').textContent = fmt(totalCompleto);
+  document.getElementById('desgloseCompletoCoche').textContent = fmt(totalFinanciar);
+  document.getElementById('desgloseCompletoInteres').textContent = fmt(totalIntereses);
+
+  // Si cancelas
+  document.getElementById('cuotasPagadasVal').textContent = fmt(cuotasPagadas);
+  document.getElementById('cuotasPagadasSub').textContent = `${mesCancelacion} × ${fmt(cuota)}`;
+  document.getElementById('capitalAmortizado').textContent = fmt(capitalAmortizadoTotal);
+  document.getElementById('interesesPagados').textContent = fmt(interesesPagadosTotal);
   document.getElementById('capitalPendiente').textContent = fmt(cancelData.pendiente);
   document.getElementById('capitalSub').textContent = 'mes ' + mesCancelacion;
   document.getElementById('penalizacionVal').textContent = fmt(cancelData.penalizacion);
@@ -1139,6 +1167,7 @@ function calcular() {
   document.getElementById('totalCancelando').textContent = fmt(totalCancelando);
   document.getElementById('ahorroTotal').textContent = fmt(ahorro);
   document.getElementById('mesLabel').textContent = mesCancelacion;
+  document.getElementById('mesLabel2').textContent = mesCancelacion;
   document.getElementById('plazoLabel').textContent = plazo;
   document.getElementById('barCancel').textContent = fmt(totalCancelando);
   document.getElementById('barFull').textContent = fmt(totalCompleto);
