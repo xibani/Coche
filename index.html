@@ -166,6 +166,11 @@ body {
   outline: none;
 }
 
+.field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
 .field input:focus, .field select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
@@ -673,6 +678,30 @@ tbody td.cancel-col { color: var(--amber); }
             </div>
           </div>
           <hr class="divider">
+          <div class="toggle-row">
+            <span>Marcar fecha de compra</span>
+            <label class="toggle">
+              <input type="checkbox" id="marcarFecha">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="fechaFields" style="display:none; margin-top:0.5rem;">
+            <div class="field">
+              <label>Fecha de compra (mes 1)</label>
+              <input type="date" id="fechaCompra">
+            </div>
+            <div class="stats-grid" style="margin-top:0.75rem;">
+              <div class="stat-box">
+                <div class="label">Hoy</div>
+                <div class="value" id="fechaHoy" style="font-size:0.82rem;">—</div>
+              </div>
+              <div class="stat-box">
+                <div class="label">Fecha de cancelación</div>
+                <div class="value accent" id="fechaCancelacion" style="font-size:0.82rem;">—</div>
+              </div>
+            </div>
+          </div>
+          <hr class="divider">
           <div class="stats-grid" style="margin-bottom:1rem;">
             <div class="stat-box">
               <div class="label">Intereses pagados</div>
@@ -880,6 +909,20 @@ tbody td.cancel-col { color: var(--amber); }
   </div>
 </div>
 
+<div style="text-align:center; padding: 1.25rem 1.5rem 0;">
+  <button id="btnDescargar" style="
+    background: var(--accent-dim);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+  ">Descargar resumen (.txt)</button>
+</div>
 <div class="footer">
   Simulación orientativa · Los importes exactos pueden variar según las condiciones del contrato
 </div>
@@ -1008,6 +1051,26 @@ function calcular() {
   const totalCancelando = entrada + transferencia + cuotasPagadas + cancelData.cancelar;
   const ahorro = totalCompleto - totalCancelando;
 
+  // Fechas
+  const marcarFecha = document.getElementById('marcarFecha').checked;
+  document.getElementById('fechaFields').style.display = marcarFecha ? 'block' : 'none';
+
+  if (marcarFecha) {
+    const fechaCompraInput = document.getElementById('fechaCompra').value;
+    const hoy = new Date();
+    const optsDate = { day: '2-digit', month: 'short', year: 'numeric' };
+    document.getElementById('fechaHoy').textContent = hoy.toLocaleDateString('es-ES', optsDate);
+
+    if (fechaCompraInput) {
+      const fechaCompra = new Date(fechaCompraInput + 'T00:00:00');
+      const fechaCancel = new Date(fechaCompra);
+      fechaCancel.setMonth(fechaCancel.getMonth() + mesCancelacion);
+      document.getElementById('fechaCancelacion').textContent = fechaCancel.toLocaleDateString('es-ES', optsDate);
+    } else {
+      document.getElementById('fechaCancelacion').textContent = '—';
+    }
+  }
+
   // Update DOM
   document.getElementById('interesesPagados').textContent = fmt(interesesPagadosTotal);
   document.getElementById('capitalAmortizado').textContent = fmt(capitalAmortizadoTotal);
@@ -1096,6 +1159,73 @@ const inputs = document.querySelectorAll('input, select');
 inputs.forEach(input => {
   input.addEventListener('input', calcular);
   input.addEventListener('change', calcular);
+});
+
+// Descargar resumen TXT
+document.getElementById('btnDescargar').addEventListener('click', function() {
+  const g = id => document.getElementById(id)?.textContent?.trim() || '';
+
+  let txt = '=== CALCULADORA DE FINANCIACIÓN ===\n';
+  txt += 'Generado: ' + new Date().toLocaleString('es-ES') + '\n\n';
+
+  txt += '--- DATOS DEL VEHÍCULO ---\n';
+  txt += 'Precio al contado: ' + document.getElementById('precioContado').value + ' €\n';
+  txt += 'Descuento aplicado: ' + document.getElementById('descuento').value + ' €\n';
+  txt += 'Precio final cliente: ' + g('precioFinal') + '\n\n';
+
+  txt += '--- FINANCIACIÓN ---\n';
+  txt += 'Entrada total: ' + document.getElementById('entrada').value + ' €\n';
+  txt += 'Transferencia: ' + document.getElementById('transferencia').value + ' €\n';
+  txt += 'Garantía ampliada: ' + document.getElementById('garantia').value + ' €\n';
+  txt += 'Interés anual: ' + document.getElementById('interes').value + '%\n';
+  txt += 'Plazo: ' + document.getElementById('plazo').value + ' meses\n';
+  txt += 'Total a financiar: ' + g('totalFinanciar') + '\n';
+  txt += 'Cuota mensual: ' + g('cuotaMensual') + '\n';
+  txt += 'Total si completas: ' + g('totalCompleto') + '\n\n';
+
+  txt += '--- CANCELACIÓN ANTICIPADA ---\n';
+  txt += 'Mes de cancelación: ' + document.getElementById('mesCancelacion').value + '\n';
+
+  const marcarFecha = document.getElementById('marcarFecha').checked;
+  if (marcarFecha && document.getElementById('fechaCompra').value) {
+    txt += 'Fecha de compra: ' + document.getElementById('fechaCompra').value + '\n';
+    txt += 'Fecha de cancelación: ' + g('fechaCancelacion') + '\n';
+  }
+
+  txt += 'Intereses pagados: ' + g('interesesPagados') + '\n';
+  txt += 'Capital amortizado: ' + g('capitalAmortizado') + '\n';
+  txt += 'Capital pendiente: ' + g('capitalPendiente') + '\n';
+  txt += 'Penalización (' + document.getElementById('penalizacion').value + '%): ' + g('penalizacionVal') + '\n';
+  txt += 'Importe para cancelar: ' + g('importeCancelar') + '\n';
+  txt += 'Total real pagado: ' + g('totalCancelando') + '\n';
+  txt += 'Ahorro estimado cancelando: ' + g('ahorroTotal') + '\n\n';
+
+  txt += '--- PLAN DE AHORRO PARA CANCELAR ---\n';
+  txt += 'Dinero previsto como entrada: ' + document.getElementById('dineroPrevisto').value + ' €\n';
+
+  const cocheEntrada = document.getElementById('cocheEntrada').checked;
+  if (cocheEntrada) {
+    txt += 'Coche como entrada: Sí (valor: ' + document.getElementById('valorCoche').value + ' €)\n';
+    txt += 'Efectivo al firmar: ' + g('efectivoFirma') + '\n';
+  }
+
+  txt += 'Dinero reservado desde el día 1: ' + g('dineroReservado') + '\n';
+  txt += 'Importe objetivo: ' + g('planObjetivo') + '\n';
+  txt += 'Te falta ahorrar: ' + g('faltante') + '\n';
+  txt += 'Ahorro mensual necesario: ' + g('ahorroMensual') + '\n\n';
+
+  txt += '--- ESFUERZO MENSUAL TOTAL ---\n';
+  txt += 'Cuota financiación: ' + g('planCuota') + '\n';
+  txt += 'Ahorro para cancelar: ' + g('planAhorro') + '\n';
+  txt += 'Total mensual: ' + g('planTotal') + '\n';
+
+  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'resumen_financiacion.txt';
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 // Initial calculation
