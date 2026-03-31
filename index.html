@@ -15,7 +15,6 @@
   --border-light: #343c50;
   --text: #e8eaf0;
   --text-dim: #8a90a0;
-  --text-muted: #5a6070;
   --accent: #3b82f6;
   --accent-dim: #2563eb;
   --accent-glow: rgba(59, 130, 246, 0.15);
@@ -195,6 +194,55 @@ body {
   border: none;
   border-top: 1px solid var(--border);
   margin: 1rem 0;
+}
+
+.coste-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+.coste-row input[type="text"] {
+  font-size: 0.85rem;
+}
+.coste-row input[type="number"] {
+  width: 90px;
+  font-size: 0.85rem;
+}
+.btn-remove-coste {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.btn-remove-coste:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+.btn-add-coste {
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--text-dim);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  margin-top: 0.2rem;
+  width: 100%;
+}
+.btn-add-coste:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* Toggle */
@@ -616,6 +664,11 @@ tbody td.cancel-col { color: var(--amber); }
               <input type="number" id="garantia" value="750" step="50">
             </div>
           </div>
+          <div class="field" style="margin-top:0.25rem;">
+            <label>Costes adicionales financiados</label>
+            <div id="costesAdicionalesList"></div>
+            <button type="button" id="btnAddCoste" class="btn-add-coste">+ Añadir coste</button>
+          </div>
           <div class="input-row">
             <div class="field">
               <label>Interés anual (%)</label>
@@ -953,7 +1006,8 @@ function calcular() {
 
   // Price calc
   const precioFinal = precioContado - descuento; // 23.000 €
-  const totalFinanciar = precioFinal - entrada + garantia; // 23.000 - 7.500 + 750 = 16.250 €
+  const costesExtra = Array.from(document.querySelectorAll('.coste-extra-amount')).reduce((s, el) => s + (+el.value || 0), 0);
+  const totalFinanciar = precioFinal - entrada + garantia + costesExtra;
 
   const usarCuotaReal = document.getElementById('usarCuotaReal').checked;
   const cuotaRealInput = +document.getElementById('cuotaReal').value;
@@ -1154,6 +1208,25 @@ function calcular() {
 
 }
 
+// Costes adicionales
+function addCosteRow(label = '', amount = '') {
+  const list = document.getElementById('costesAdicionalesList');
+  const row = document.createElement('div');
+  row.className = 'coste-row';
+  row.innerHTML = `
+    <input type="text" class="coste-extra-label" placeholder="Descripción" value="${label}" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.35rem 0.5rem;color:var(--text);">
+    <input type="number" class="coste-extra-amount" placeholder="0" value="${amount}" step="50" min="0" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.35rem 0.5rem;color:var(--text);text-align:right;">
+    <button type="button" class="btn-remove-coste" title="Eliminar">×</button>
+  `;
+  row.querySelector('.btn-remove-coste').addEventListener('click', () => { row.remove(); calcular(); });
+  row.querySelector('.coste-extra-amount').addEventListener('input', calcular);
+  row.querySelector('.coste-extra-label').addEventListener('input', calcular);
+  list.appendChild(row);
+  calcular();
+}
+
+document.getElementById('btnAddCoste').addEventListener('click', () => addCosteRow());
+
 // Event listeners
 const inputs = document.querySelectorAll('input, select');
 inputs.forEach(input => {
@@ -1177,6 +1250,15 @@ document.getElementById('btnDescargar').addEventListener('click', function() {
   txt += 'Entrada total: ' + document.getElementById('entrada').value + ' €\n';
   txt += 'Transferencia: ' + document.getElementById('transferencia').value + ' €\n';
   txt += 'Garantía ampliada: ' + document.getElementById('garantia').value + ' €\n';
+  const costeRows = document.querySelectorAll('.coste-row');
+  if (costeRows.length > 0) {
+    txt += 'Costes adicionales:\n';
+    costeRows.forEach(row => {
+      const lbl = row.querySelector('.coste-extra-label').value || 'Sin descripción';
+      const amt = row.querySelector('.coste-extra-amount').value || '0';
+      txt += '  · ' + lbl + ': ' + amt + ' €\n';
+    });
+  }
   txt += 'Interés anual: ' + document.getElementById('interes').value + '%\n';
   txt += 'Plazo: ' + document.getElementById('plazo').value + ' meses\n';
   txt += 'Total a financiar: ' + g('totalFinanciar') + '\n';
