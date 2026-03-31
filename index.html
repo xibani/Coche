@@ -1047,27 +1047,12 @@ function calcular() {
   let cuota;
 
   if (usarCuotaReal && cuotaRealInput > 0) {
-    // Use the dealer's real cuota
+    // Use the dealer's real cuota + the user-provided interest rate directly
     cuota = cuotaRealInput;
     if (seguroVida) {
       cuota = cuotaRealInput * (327.93 / 312.85);
     }
-    // Back-calculate effective monthly rate via bisection
-    // so the amortization table is consistent
-    if (totalFinanciar > 0 && cuota > totalFinanciar / n) {
-      let lo = 1e-10, hi = 1.0;
-      for (let i = 0; i < 200; i++) {
-        const mid = (lo + hi) / 2;
-        const pwr = Math.pow(1 + mid, n);
-        const payment = totalFinanciar * (mid * pwr) / (pwr - 1);
-        if (payment < cuota) lo = mid;
-        else hi = mid;
-        if (hi - lo < 1e-12) break;
-      }
-      r = (lo + hi) / 2;
-    } else if (totalFinanciar > 0) {
-      r = 0;
-    }
+    // r stays as interesAnual / 100 / 12 (the known rate)
   } else {
     if (r === 0) {
       cuota = totalFinanciar / n;
