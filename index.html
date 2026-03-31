@@ -86,13 +86,28 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
   align-items: start;
+  max-width: 520px;
+  margin: 0 auto;
 }
 
-@media (max-width: 900px) {
-  .grid { grid-template-columns: 1fr; }
+@media (max-width: 520px) {
+  .container { padding: 0.75rem; }
+  .header { padding: 1.25rem 1rem 0.75rem; }
+  .header h1 { font-size: 1.15rem; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .input-row { grid-template-columns: 1fr; }
+  .card-body { padding: 1rem; }
+  .card-header { padding: 0.75rem 1rem 0.6rem; }
+  .field input, .field select { font-size: 1rem; padding: 0.7rem 0.8rem; }
+  .coste-row input[type="number"] { width: 80px; }
+  .compare-bar { height: 20px; }
+  .table-scroll { max-height: 400px; }
+  table { font-size: 0.72rem; }
+  thead th { font-size: 0.62rem; padding: 0.5rem 0.4rem; }
+  tbody td { font-size: 0.7rem; padding: 0.45rem 0.4rem; }
 }
 
 /* Cards */
@@ -563,13 +578,6 @@ tbody td.cancel-col { color: var(--amber); }
 
 .info-banner strong { color: var(--accent); }
 
-/* Right column */
-.right-col {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
 /* Footer */
 .footer {
   text-align: center;
@@ -613,9 +621,6 @@ tbody td.cancel-col { color: var(--amber); }
 
 <div class="container">
   <div class="grid">
-
-    <!-- LEFT: Inputs -->
-    <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
       <div class="card">
         <div class="card-header">
@@ -712,6 +717,20 @@ tbody td.cancel-col { color: var(--amber); }
               <input type="number" id="cuotaReal" value="247.61" step="0.01">
             </div>
           </div>
+          <hr class="divider">
+          <div class="toggle-row">
+            <span>Cuota final / VFG (tipo Toyota Easy)</span>
+            <label class="toggle">
+              <input type="checkbox" id="usarVFG">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="vfgFields" style="display:none; margin-top:0.5rem;">
+            <div class="field">
+              <label>Cuota final / Valor Futuro Garantizado (€)</label>
+              <input type="number" id="vfgAmount" value="8000" step="100">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -777,12 +796,7 @@ tbody td.cancel-col { color: var(--amber); }
         </div>
       </div>
 
-    </div>
-
-    <!-- RIGHT: Results -->
-    <div class="right-col">
-
-      <!-- Summary Cards (primero) -->
+      <!-- Summary Cards -->
       <div class="card">
         <div class="card-header">
           <div class="icon blue">📊</div>
@@ -820,6 +834,24 @@ tbody td.cancel-col { color: var(--amber); }
               <div class="label">Intereses totales</div>
               <div class="value red" id="desgloseCompletoInteres">6.275 €</div>
               <div class="sub">coste de la financiación</div>
+            </div>
+            <div class="stat-box" id="vfgCompletoBox" style="display:none;">
+              <div class="label">Cuota final (VFG)</div>
+              <div class="value amber" id="vfgCompletoVal">0 €</div>
+              <div class="sub">pago final para quedarte el coche</div>
+            </div>
+          </div>
+          <div id="vfgOpcionesBox" style="display:none;">
+            <div class="plan-box" style="margin-top:0.75rem;">
+              <h4>Opciones al final del plazo</h4>
+              <div class="plan-row">
+                <span class="plan-label">Quedarte el coche (pagar VFG)</span>
+                <span class="plan-value" id="vfgOpcionQuedar" style="color:var(--red);"></span>
+              </div>
+              <div class="plan-row">
+                <span class="plan-label">Devolver el coche</span>
+                <span class="plan-value" id="vfgOpcionDevolver" style="color:var(--green);"></span>
+              </div>
             </div>
           </div>
 
@@ -987,11 +1019,10 @@ tbody td.cancel-col { color: var(--amber); }
         </div>
       </div>
 
-    </div>
   </div>
 </div>
 
-<div style="text-align:center; padding: 1.25rem 1.5rem 0;">
+<div style="text-align:center; padding: 1.25rem 1.5rem 0; max-width:520px; margin:0 auto;">
   <button id="btnDescargar" style="
     background: var(--accent-dim);
     color: var(--text);
@@ -1030,6 +1061,11 @@ function calcular() {
   const cocheEntrada = document.getElementById('cocheEntrada').checked;
   const valorCoche = +document.getElementById('valorCoche').value;
   const dineroPrevisto = +document.getElementById('dineroPrevisto').value;
+  const usarVFG = document.getElementById('usarVFG').checked;
+  const vfg = usarVFG ? +document.getElementById('vfgAmount').value : 0;
+
+  // Show/hide VFG fields
+  document.getElementById('vfgFields').style.display = usarVFG ? 'block' : 'none';
 
   document.getElementById('mesCancelacion').max = plazo;
 
@@ -1060,17 +1096,19 @@ function calcular() {
     // r stays as interesAnual / 100 / 12 (the known rate)
   } else {
     if (r === 0) {
-      cuota = totalFinanciar / n;
+      cuota = (totalFinanciar - vfg) / n;
     } else {
-      cuota = totalFinanciar * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      const pwr = Math.pow(1 + r, n);
+      // Con VFG: cuota cubre intereses sobre todo el saldo, pero solo amortiza (total - VFG)
+      cuota = (totalFinanciar - vfg / pwr) * (r * pwr) / (pwr - 1);
     }
     if (seguroVida) {
       cuota = cuota * (327.93 / 312.85);
     }
   }
 
-  // Total if complete
-  const totalCompleto = entrada + transferencia + cuota * n;
+  // Total if complete (incluye VFG como pago final)
+  const totalCompleto = entrada + transferencia + cuota * n + vfg;
 
   // Amortization schedule
   let balance = totalFinanciar;
@@ -1147,6 +1185,20 @@ function calcular() {
   document.getElementById('totalCompleto').textContent = fmt(totalCompleto);
   document.getElementById('desgloseCompletoCoche').textContent = fmt(totalFinanciar);
   document.getElementById('desgloseCompletoInteres').textContent = fmt(totalIntereses);
+
+  // VFG / Toyota Easy
+  if (vfg > 0) {
+    document.getElementById('vfgCompletoBox').style.display = '';
+    document.getElementById('vfgCompletoVal').textContent = fmt(vfg);
+    document.getElementById('vfgOpcionesBox').style.display = '';
+    const totalQuedar = entrada + transferencia + cuota * n + vfg;
+    const totalDevolver = entrada + transferencia + cuota * n;
+    document.getElementById('vfgOpcionQuedar').textContent = fmt(totalQuedar);
+    document.getElementById('vfgOpcionDevolver').textContent = fmt(totalDevolver);
+  } else {
+    document.getElementById('vfgCompletoBox').style.display = 'none';
+    document.getElementById('vfgOpcionesBox').style.display = 'none';
+  }
 
   // Si cancelas
   document.getElementById('cuotasPagadasVal').textContent = fmt(cuotasPagadas);
@@ -1295,7 +1347,13 @@ document.getElementById('btnDescargar').addEventListener('click', function() {
   txt += 'Plazo: ' + document.getElementById('plazo').value + ' meses\n';
   txt += 'Total a financiar: ' + g('totalFinanciar') + '\n';
   txt += 'Cuota mensual: ' + g('cuotaMensual') + '\n';
-  txt += 'Total si completas: ' + g('totalCompleto') + '\n\n';
+  txt += 'Total si completas: ' + g('totalCompleto') + '\n';
+  if (document.getElementById('usarVFG').checked) {
+    txt += 'Cuota final / VFG: ' + document.getElementById('vfgAmount').value + ' €\n';
+    txt += 'Total si te quedas el coche: ' + g('vfgOpcionQuedar') + '\n';
+    txt += 'Total si devuelves el coche: ' + g('vfgOpcionDevolver') + '\n';
+  }
+  txt += '\n';
 
   txt += '--- CANCELACIÓN ANTICIPADA ---\n';
   txt += 'Mes de cancelación: ' + document.getElementById('mesCancelacion').value + '\n';
