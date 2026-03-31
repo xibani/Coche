@@ -673,6 +673,16 @@ tbody td.cancel-col { color: var(--amber); }
             </div>
           </div>
           <hr class="divider">
+          <div class="stats-grid" style="margin-bottom:1rem;">
+            <div class="stat-box">
+              <div class="label">Intereses pagados</div>
+              <div class="value red" id="interesesPagados" style="font-size:0.95rem;">0,00 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Capital amortizado</div>
+              <div class="value green" id="capitalAmortizado" style="font-size:0.95rem;">0,00 €</div>
+            </div>
+          </div>
           <div class="field">
             <label>Dinero que tenías previsto como entrada (€)</label>
             <input type="number" id="dineroPrevisto" value="12500" step="100">
@@ -699,7 +709,73 @@ tbody td.cancel-col { color: var(--amber); }
     <!-- RIGHT: Results -->
     <div class="right-col">
 
-      <!-- Summary Cards -->
+      <!-- Plan de ahorro para cancelar (SIEMPRE visible, antes del resumen) -->
+      <div class="card" id="planAhorroCard">
+        <div class="card-header">
+          <div class="icon green">🎯</div>
+          <h2>Plan de ahorro para cancelar</h2>
+        </div>
+        <div class="card-body">
+          <div class="info-banner" id="planBanner"></div>
+          <div class="stats-grid">
+            <div class="stat-box" id="efectivoFirmaBox">
+              <div class="label">Efectivo al firmar</div>
+              <div class="value" id="efectivoFirma">4.000 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Importe para cancelar (mes <span id="planMesRef">18</span>)</div>
+              <div class="value amber" id="planObjetivo">13.292,60 €</div>
+              <div class="sub">= capital pendiente + penalización</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Dinero reservado desde el día 1</div>
+              <div class="value accent" id="dineroReservado">8.500 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Te falta ahorrar</div>
+              <div class="value amber" id="faltante">4.792,60 €</div>
+              <div class="sub" id="faltanteSub">objetivo − reservado</div>
+            </div>
+          </div>
+          <div class="plan-box" style="margin-top:0.75rem;">
+            <div class="plan-row">
+              <span class="plan-label">Ahorro mensual necesario</span>
+              <span class="plan-value green" id="ahorroMensual" style="font-size:1rem;">266,26 €</span>
+            </div>
+            <div class="plan-row">
+              <span class="plan-label" style="color:var(--text-muted); font-size:0.72rem;" id="ahorroSub">4.792,60 € ÷ 18 meses</span>
+              <span></span>
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="plan-box">
+            <h4>Esfuerzo mensual total</h4>
+            <div class="plan-row">
+              <span class="plan-label">Cuota financiación</span>
+              <span class="plan-value" id="planCuota">312,85 €</span>
+            </div>
+            <div class="plan-row">
+              <span class="plan-label">Ahorro para cancelar</span>
+              <span class="plan-value" id="planAhorro" style="color:var(--green)">460,70 €</span>
+            </div>
+            <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
+              <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual</span>
+              <span class="plan-value" style="color:var(--accent); font-size:0.95rem;" id="planTotal">773,55 €</span>
+            </div>
+          </div>
+          <div class="progress-wrapper">
+            <div class="progress-label">
+              <span>Reservado al inicio</span>
+              <span id="progressPct">37.6%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill" style="width:37.6%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Cards (después del plan, usa datos del plan) -->
       <div class="card">
         <div class="card-header">
           <div class="icon blue">📊</div>
@@ -772,72 +848,6 @@ tbody td.cancel-col { color: var(--amber); }
             <div class="compare-label">
               <span style="font-size:0.78rem; font-weight:600; color:var(--green);">Ahorro estimado cancelando</span>
               <span class="badge green" id="ahorroTotal">3.601,30 €</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Plan de ahorro para cancelar -->
-      <div class="card" id="planAhorroCard" style="display:none;">
-        <div class="card-header">
-          <div class="icon green">🎯</div>
-          <h2>Plan de ahorro para cancelar</h2>
-        </div>
-        <div class="card-body">
-          <div class="info-banner" id="planBanner"></div>
-          <div class="stats-grid">
-            <div class="stat-box">
-              <div class="label">Efectivo al firmar</div>
-              <div class="value" id="efectivoFirma">4.000 €</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Importe para cancelar (mes <span id="planMesRef">18</span>)</div>
-              <div class="value amber" id="planObjetivo">13.292,60 €</div>
-              <div class="sub">= capital pendiente + penalización</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Dinero reservado desde el día 1</div>
-              <div class="value accent" id="dineroReservado">8.500 €</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Te falta ahorrar</div>
-              <div class="value amber" id="faltante">4.792,60 €</div>
-              <div class="sub" id="faltanteSub">objetivo − reservado</div>
-            </div>
-          </div>
-          <div class="plan-box" style="margin-top:0.75rem;">
-            <div class="plan-row">
-              <span class="plan-label">Ahorro mensual necesario</span>
-              <span class="plan-value green" id="ahorroMensual" style="font-size:1rem;">266,26 €</span>
-            </div>
-            <div class="plan-row">
-              <span class="plan-label" style="color:var(--text-muted); font-size:0.72rem;" id="ahorroSub">4.792,60 € ÷ 18 meses</span>
-              <span></span>
-            </div>
-          </div>
-          <hr class="divider">
-          <div class="plan-box">
-            <h4>Esfuerzo mensual total</h4>
-            <div class="plan-row">
-              <span class="plan-label">Cuota financiación</span>
-              <span class="plan-value" id="planCuota">312,85 €</span>
-            </div>
-            <div class="plan-row">
-              <span class="plan-label">Ahorro para cancelar</span>
-              <span class="plan-value" id="planAhorro" style="color:var(--green)">460,70 €</span>
-            </div>
-            <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
-              <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual</span>
-              <span class="plan-value" style="color:var(--accent); font-size:0.95rem;" id="planTotal">773,55 €</span>
-            </div>
-          </div>
-          <div class="progress-wrapper">
-            <div class="progress-label">
-              <span>Reservado al inicio</span>
-              <span id="progressPct">37.6%</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" id="progressFill" style="width:37.6%"></div>
             </div>
           </div>
         </div>
@@ -987,10 +997,20 @@ function calcular() {
   // Cancelación values
   const cancelData = schedule[mesCancelacion - 1];
   const cuotasPagadas = cuota * mesCancelacion;
+
+  // Intereses pagados y capital amortizado hasta el mes de cancelación
+  let interesesPagadosTotal = 0;
+  let capitalAmortizadoTotal = 0;
+  for (let m = 0; m < mesCancelacion; m++) {
+    interesesPagadosTotal += schedule[m].interes;
+    capitalAmortizadoTotal += schedule[m].capital;
+  }
   const totalCancelando = entrada + transferencia + cuotasPagadas + cancelData.cancelar;
   const ahorro = totalCompleto - totalCancelando;
 
   // Update DOM
+  document.getElementById('interesesPagados').textContent = fmt(interesesPagadosTotal);
+  document.getElementById('capitalAmortizado').textContent = fmt(capitalAmortizadoTotal);
   document.getElementById('precioFinal').textContent = fmt(precioFinal);
   document.getElementById('totalFinanciar').textContent = fmt(totalFinanciar);
   document.getElementById('cuotaMensual').textContent = fmt(cuota);
@@ -1010,42 +1030,45 @@ function calcular() {
   document.getElementById('barCancelFill').style.width = pctCancel + '%';
   document.getElementById('barFullFill').style.width = '100%';
 
-  // Plan de ahorro
-  const planCard = document.getElementById('planAhorroCard');
+  // Plan de ahorro (siempre visible)
   const cocheFieldsDiv = document.getElementById('cocheFields');
-
   cocheFieldsDiv.style.display = cocheEntrada ? 'block' : 'none';
 
-  if (cocheEntrada && dineroPrevisto > 0) {
-    planCard.style.display = '';
+  // Efectivo al firmar y dinero reservado dependen de si hay coche como entrada
+  let efectivo, sobrante, bannerText;
 
-    const efectivo = entrada - valorCoche;
-    const sobrante = Math.max(0, dineroPrevisto - efectivo);
-    const objetivo = cancelData.cancelar;
-    const faltante = Math.max(0, objetivo - sobrante);
-    const ahorroMes = faltante > 0 ? faltante / mesCancelacion : 0;
-    const totalMes = cuota + ahorroMes;
-    const pctReservado = (sobrante / objetivo) * 100;
-
-    const bannerText = `Tu coche vale <strong>${fmt(valorCoche)}</strong> y la entrada máxima es <strong>${fmt(entrada)}</strong>, así que solo pones <strong>${fmt(Math.max(0, efectivo))}</strong> en efectivo. De los <strong>${fmt(dineroPrevisto)}</strong> que tenías previstos, te sobran <strong>${fmt(sobrante)}</strong> para guardar y cancelar.`;
-
-    document.getElementById('planBanner').innerHTML = bannerText;
-    document.getElementById('planMesRef').textContent = mesCancelacion;
-    document.getElementById('planObjetivo').textContent = fmt(objetivo);
+  if (cocheEntrada) {
+    efectivo = entrada - valorCoche;
+    sobrante = Math.max(0, dineroPrevisto - Math.max(0, efectivo));
+    bannerText = `Tu coche vale <strong>${fmt(valorCoche)}</strong> y la entrada máxima es <strong>${fmt(entrada)}</strong>, así que solo pones <strong>${fmt(Math.max(0, efectivo))}</strong> en efectivo. De los <strong>${fmt(dineroPrevisto)}</strong> que tenías previstos, te sobran <strong>${fmt(sobrante)}</strong> para guardar y cancelar.`;
+    document.getElementById('efectivoFirmaBox').style.display = '';
     document.getElementById('efectivoFirma').textContent = fmt(Math.max(0, efectivo));
-    document.getElementById('dineroReservado').textContent = fmt(sobrante);
-    document.getElementById('faltante').textContent = fmt(faltante);
-    document.getElementById('faltanteSub').textContent = `${fmt(objetivo)} − ${fmt(sobrante)}`;
-    document.getElementById('ahorroMensual').textContent = fmt(ahorroMes);
-    document.getElementById('ahorroSub').textContent = `${fmt(faltante)} ÷ ${mesCancelacion} meses`;
-    document.getElementById('planCuota').textContent = fmt(cuota);
-    document.getElementById('planAhorro').textContent = fmt(ahorroMes);
-    document.getElementById('planTotal').textContent = fmt(totalMes);
-    document.getElementById('progressPct').textContent = Math.min(100, pctReservado).toFixed(1) + '%';
-    document.getElementById('progressFill').style.width = Math.min(100, pctReservado).toFixed(1) + '%';
   } else {
-    planCard.style.display = 'none';
+    efectivo = entrada;
+    sobrante = Math.max(0, dineroPrevisto - entrada);
+    bannerText = `Has puesto <strong>${fmt(entrada)}</strong> de entrada. De los <strong>${fmt(dineroPrevisto)}</strong> que tenías previstos, te sobran <strong>${fmt(sobrante)}</strong> para guardar y cancelar.`;
+    document.getElementById('efectivoFirmaBox').style.display = 'none';
   }
+
+  const objetivo = cancelData.cancelar;
+  const faltante = Math.max(0, objetivo - sobrante);
+  const ahorroMes = faltante > 0 ? faltante / mesCancelacion : 0;
+  const totalMes = cuota + ahorroMes;
+  const pctReservado = objetivo > 0 ? (sobrante / objetivo) * 100 : 0;
+
+  document.getElementById('planBanner').innerHTML = bannerText;
+  document.getElementById('planMesRef').textContent = mesCancelacion;
+  document.getElementById('planObjetivo').textContent = fmt(objetivo);
+  document.getElementById('dineroReservado').textContent = fmt(sobrante);
+  document.getElementById('faltante').textContent = fmt(faltante);
+  document.getElementById('faltanteSub').textContent = `${fmt(objetivo)} − ${fmt(sobrante)}`;
+  document.getElementById('ahorroMensual').textContent = fmt(ahorroMes);
+  document.getElementById('ahorroSub').textContent = `${fmt(faltante)} ÷ ${mesCancelacion} meses`;
+  document.getElementById('planCuota').textContent = fmt(cuota);
+  document.getElementById('planAhorro').textContent = fmt(ahorroMes);
+  document.getElementById('planTotal').textContent = fmt(totalMes);
+  document.getElementById('progressPct').textContent = Math.min(100, pctReservado).toFixed(1) + '%';
+  document.getElementById('progressFill').style.width = Math.min(100, pctReservado).toFixed(1) + '%';
 
   // Table
   const tbody = document.getElementById('tableBody');
@@ -1066,13 +1089,6 @@ function calcular() {
     tbody.appendChild(tr);
   }
 
-  // Scroll to highlighted row after rendering
-  setTimeout(() => {
-    const highlighted = tbody.querySelector('.highlight');
-    if (highlighted) {
-      highlighted.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    }
-  }, 100);
 }
 
 // Event listeners
