@@ -782,73 +782,7 @@ tbody td.cancel-col { color: var(--amber); }
     <!-- RIGHT: Results -->
     <div class="right-col">
 
-      <!-- Plan de ahorro para cancelar (SIEMPRE visible, antes del resumen) -->
-      <div class="card" id="planAhorroCard">
-        <div class="card-header">
-          <div class="icon green">🎯</div>
-          <h2>Plan de ahorro para cancelar</h2>
-        </div>
-        <div class="card-body">
-          <div class="info-banner" id="planBanner"></div>
-          <div class="stats-grid">
-            <div class="stat-box" id="efectivoFirmaBox">
-              <div class="label">Efectivo al firmar</div>
-              <div class="value" id="efectivoFirma">4.000 €</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Importe para cancelar (mes <span id="planMesRef">18</span>)</div>
-              <div class="value amber" id="planObjetivo">13.292,60 €</div>
-              <div class="sub">= capital pendiente + penalización</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Dinero reservado desde el día 1</div>
-              <div class="value accent" id="dineroReservado">8.500 €</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Te falta ahorrar</div>
-              <div class="value amber" id="faltante">4.792,60 €</div>
-              <div class="sub" id="faltanteSub">objetivo − reservado</div>
-            </div>
-          </div>
-          <div class="plan-box" style="margin-top:0.75rem;">
-            <div class="plan-row">
-              <span class="plan-label">Ahorro mensual necesario</span>
-              <span class="plan-value green" id="ahorroMensual" style="font-size:1rem;">266,26 €</span>
-            </div>
-            <div class="plan-row">
-              <span class="plan-label" style="color:var(--text-muted); font-size:0.72rem;" id="ahorroSub">4.792,60 € ÷ 18 meses</span>
-              <span></span>
-            </div>
-          </div>
-          <hr class="divider">
-          <div class="plan-box">
-            <h4>Esfuerzo mensual total</h4>
-            <div class="plan-row">
-              <span class="plan-label">Cuota financiación</span>
-              <span class="plan-value" id="planCuota">312,85 €</span>
-            </div>
-            <div class="plan-row">
-              <span class="plan-label">Ahorro para cancelar</span>
-              <span class="plan-value" id="planAhorro" style="color:var(--green)">460,70 €</span>
-            </div>
-            <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
-              <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual</span>
-              <span class="plan-value" style="color:var(--accent); font-size:0.95rem;" id="planTotal">773,55 €</span>
-            </div>
-          </div>
-          <div class="progress-wrapper">
-            <div class="progress-label">
-              <span>Reservado al inicio</span>
-              <span id="progressPct">37.6%</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" id="progressFill" style="width:37.6%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Summary Cards -->
+      <!-- Summary Cards (primero) -->
       <div class="card">
         <div class="card-header">
           <div class="icon blue">📊</div>
@@ -919,6 +853,11 @@ tbody td.cancel-col { color: var(--amber); }
               <div class="value amber" id="penalizacionVal">131,61 €</div>
               <div class="sub">1%</div>
             </div>
+            <div class="stat-box" id="costeCierreBox" style="display:none;">
+              <div class="label">Coste de cierre</div>
+              <div class="value amber" id="costeCierreVal">0 €</div>
+              <div class="sub">financiado − amortizado</div>
+            </div>
             <div class="stat-box">
               <div class="label">Importe para cancelar</div>
               <div class="value amber" id="importeCancelar">13.292,60 €</div>
@@ -954,6 +893,72 @@ tbody td.cancel-col { color: var(--amber); }
             <div class="compare-label">
               <span style="font-size:0.78rem; font-weight:600; color:var(--green);">Ahorro estimado cancelando</span>
               <span class="badge green" id="ahorroTotal">3.601,30 €</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan de ahorro para cancelar (después del resumen) -->
+      <div class="card" id="planAhorroCard">
+        <div class="card-header">
+          <div class="icon green">🎯</div>
+          <h2>Plan de ahorro para cancelar</h2>
+        </div>
+        <div class="card-body">
+          <div class="info-banner" id="planBanner"></div>
+          <div class="stats-grid">
+            <div class="stat-box" id="efectivoFirmaBox">
+              <div class="label">Efectivo al firmar</div>
+              <div class="value" id="efectivoFirma">4.000 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Importe para cancelar (mes <span id="planMesRef">18</span>)</div>
+              <div class="value amber" id="planObjetivo">13.292,60 €</div>
+              <div class="sub">= capital pendiente + penalización + cierre</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Dinero reservado desde el día 1</div>
+              <div class="value accent" id="dineroReservado">8.500 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Te falta ahorrar</div>
+              <div class="value amber" id="faltante">4.792,60 €</div>
+              <div class="sub" id="faltanteSub">objetivo − reservado</div>
+            </div>
+          </div>
+          <div class="plan-box" style="margin-top:0.75rem;">
+            <div class="plan-row">
+              <span class="plan-label">Ahorro mensual necesario</span>
+              <span class="plan-value green" id="ahorroMensual" style="font-size:1rem;">266,26 €</span>
+            </div>
+            <div class="plan-row">
+              <span class="plan-label" style="color:var(--text-muted); font-size:0.72rem;" id="ahorroSub">4.792,60 € ÷ 18 meses</span>
+              <span></span>
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="plan-box">
+            <h4>Esfuerzo mensual total</h4>
+            <div class="plan-row">
+              <span class="plan-label">Cuota financiación</span>
+              <span class="plan-value" id="planCuota">312,85 €</span>
+            </div>
+            <div class="plan-row">
+              <span class="plan-label">Ahorro para cancelar</span>
+              <span class="plan-value" id="planAhorro" style="color:var(--green)">460,70 €</span>
+            </div>
+            <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
+              <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual</span>
+              <span class="plan-value" style="color:var(--accent); font-size:0.95rem;" id="planTotal">773,55 €</span>
+            </div>
+          </div>
+          <div class="progress-wrapper">
+            <div class="progress-label">
+              <span>Reservado al inicio</span>
+              <span id="progressPct">37.6%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill" style="width:37.6%"></div>
             </div>
           </div>
         </div>
@@ -1106,6 +1111,9 @@ function calcular() {
     interesesPagadosTotal += schedule[m].interes;
     capitalAmortizadoTotal += schedule[m].capital;
   }
+  // Coste de cierre = crecimiento de la deuda cuando la cuota no cubre los intereses
+  // (capitalPendiente > totalFinanciar significa que la deuda ha crecido)
+  const costeCierre = Math.max(0, cancelData.pendiente - totalFinanciar);
   const totalCancelando = entrada + transferencia + cuotasPagadas + cancelData.cancelar;
   const ahorro = totalCompleto - totalCancelando;
 
@@ -1148,6 +1156,16 @@ function calcular() {
   document.getElementById('capitalPendiente').textContent = fmt(cancelData.pendiente);
   document.getElementById('capitalSub').textContent = 'mes ' + mesCancelacion;
   document.getElementById('penalizacionVal').textContent = fmt(cancelData.penalizacion);
+
+  // Coste de cierre: mostrar solo si la deuda ha crecido
+  const costeCierreBox = document.getElementById('costeCierreBox');
+  if (costeCierre > 0) {
+    costeCierreBox.style.display = '';
+    document.getElementById('costeCierreVal').textContent = fmt(costeCierre);
+  } else {
+    costeCierreBox.style.display = 'none';
+  }
+
   document.getElementById('importeCancelar').textContent = fmt(cancelData.cancelar);
   document.getElementById('totalCancelando').textContent = fmt(totalCancelando);
   document.getElementById('ahorroTotal').textContent = fmt(ahorro);
