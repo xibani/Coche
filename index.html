@@ -586,6 +586,49 @@ tbody td.cancel-col { color: var(--amber); }
   color: var(--text-muted);
 }
 
+/* Main tabs */
+.main-tabs {
+  display: flex;
+  gap: 0;
+  max-width: 520px;
+  margin: 0 auto 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.main-tab {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: center;
+  transition: 0.2s;
+  position: relative;
+}
+
+.main-tab:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: var(--border);
+}
+
+.main-tab:hover { color: var(--text-dim); background: var(--surface-2); }
+.main-tab.active { color: var(--accent); background: var(--accent-glow); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -620,6 +663,162 @@ tbody td.cancel-col { color: var(--amber); }
 </div>
 
 <div class="container">
+  <div class="main-tabs">
+    <button class="main-tab" data-tab="toyota" onclick="switchMainTab('toyota')">Toyota Easy</button>
+    <button class="main-tab active" data-tab="otros" onclick="switchMainTab('otros')">Otros</button>
+  </div>
+
+  <!-- ===== TAB: TOYOTA EASY ===== -->
+  <div class="tab-content" id="tab-toyota">
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon blue">🚗</div>
+          <h2>Toyota Easy — Datos</h2>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Precio total del coche (€)</label>
+            <input type="number" id="toyPrecio" value="27900" step="100">
+          </div>
+          <div class="field">
+            <label>Entrada a Toyota (€)</label>
+            <input type="number" id="toyEntrada" value="8000" step="100">
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label>Cuota mensual (€)</label>
+              <input type="number" id="toyCuota" value="200" step="1">
+            </div>
+            <div class="field">
+              <label>VFG — Valor Final Garantizado (€)</label>
+              <input type="number" id="toyVFG" value="12000" step="100">
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label>Entrada a la que estás dispuesto (€)</label>
+            <input type="number" id="toyEntradaDispuesta" value="15000" step="100">
+          </div>
+          <div class="toggle-row">
+            <span>Coche actual como parte de pago</span>
+            <label class="toggle">
+              <input type="checkbox" id="toyCocheToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="toyCocheFields" style="display:none; margin-top:0.5rem;">
+            <div class="field">
+              <label>Valor del coche actual (€)</label>
+              <input type="number" id="toyValorCoche" value="3500" step="100">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toyota: Resumen -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon green">📊</div>
+          <h2>Resumen Toyota Easy</h2>
+        </div>
+        <div class="card-body">
+          <div class="info-banner" id="toyBanner"></div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="label">Precio del coche</div>
+              <div class="value" id="toyResumenPrecio">27.900 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Entrada a Toyota</div>
+              <div class="value accent" id="toyResumenEntrada">8.000 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Total cuotas (48 meses)</div>
+              <div class="value" id="toyTotalCuotas">9.600 €</div>
+              <div class="sub" id="toyTotalCuotasSub">48 × 200 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">VFG (mes 49)</div>
+              <div class="value amber" id="toyResumenVFG">12.000 €</div>
+            </div>
+            <div class="stat-box full">
+              <div class="label">Total si te quedas el coche</div>
+              <div class="value red" id="toyTotalQuedar">29.600 €</div>
+              <div class="sub">entrada + cuotas + VFG</div>
+            </div>
+          </div>
+
+          <hr class="divider">
+          <div class="section-title">Plan de ahorro para el VFG</div>
+
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="label">Dinero dispuesto como entrada</div>
+              <div class="value" id="toyDispuesto">15.000 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Entrada pagada a Toyota</div>
+              <div class="value" id="toyEntradaPagada">8.000 €</div>
+            </div>
+            <div class="stat-box" id="toyValorCocheBox" style="display:none;">
+              <div class="label">Valor coche actual</div>
+              <div class="value" id="toyValorCocheRes">3.500 €</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Dinero reservado desde el día 1</div>
+              <div class="value accent" id="toyReservado">7.000 €</div>
+              <div class="sub" id="toyReservadoSub">dispuesto + coche − entrada Toyota</div>
+            </div>
+          </div>
+
+          <div class="stats-grid" style="margin-top:0.75rem;">
+            <div class="stat-box">
+              <div class="label">VFG pendiente de cubrir</div>
+              <div class="value amber" id="toyVFGPendiente">5.000 €</div>
+              <div class="sub">VFG − reservado</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Ahorro mensual para VFG</div>
+              <div class="value green" id="toyAhorroVFG">104,17 €</div>
+              <div class="sub" id="toyAhorroVFGSub">pendiente ÷ 48 meses</div>
+            </div>
+          </div>
+
+          <div class="plan-box" style="margin-top:0.75rem;">
+            <h4>Esfuerzo mensual total</h4>
+            <div class="plan-row">
+              <span class="plan-label">Cuota Toyota</span>
+              <span class="plan-value" id="toyPlanCuota">200,00 €</span>
+            </div>
+            <div class="plan-row">
+              <span class="plan-label">Ahorro para VFG</span>
+              <span class="plan-value" style="color:var(--green)" id="toyPlanAhorro">104,17 €</span>
+            </div>
+            <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
+              <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual</span>
+              <span class="plan-value" style="color:var(--accent); font-size:0.95rem;" id="toyPlanTotal">304,17 €</span>
+            </div>
+          </div>
+
+          <div class="progress-wrapper">
+            <div class="progress-label">
+              <span>VFG cubierto desde el día 1</span>
+              <span id="toyProgressPct">58.3%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="toyProgressFill" style="width:58.3%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== TAB: OTROS ===== -->
+  <div class="tab-content active" id="tab-otros">
   <div class="grid">
 
       <div class="card">
@@ -1020,6 +1219,7 @@ tbody td.cancel-col { color: var(--amber); }
       </div>
 
   </div>
+  </div><!-- /tab-otros -->
 </div>
 
 <div style="text-align:center; padding: 1.25rem 1.5rem 0; max-width:520px; margin:0 auto;">
@@ -1400,8 +1600,80 @@ document.getElementById('btnDescargar').addEventListener('click', function() {
   URL.revokeObjectURL(url);
 });
 
+// Tab switching
+function switchMainTab(tab) {
+  document.querySelectorAll('.main-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-content').forEach(d => d.classList.toggle('active', d.id === 'tab-' + tab));
+  if (tab === 'toyota') calcularToyota();
+}
+
+// Toyota Easy calculation
+function calcularToyota() {
+  const precio = +document.getElementById('toyPrecio').value;
+  const entradaToy = +document.getElementById('toyEntrada').value;
+  const cuota = +document.getElementById('toyCuota').value;
+  const vfg = +document.getElementById('toyVFG').value;
+  const entradaDispuesta = +document.getElementById('toyEntradaDispuesta').value;
+  const cocheToggle = document.getElementById('toyCocheToggle').checked;
+  const valorCoche = cocheToggle ? +document.getElementById('toyValorCoche').value : 0;
+
+  document.getElementById('toyCocheFields').style.display = cocheToggle ? 'block' : 'none';
+  document.getElementById('toyValorCocheBox').style.display = cocheToggle ? '' : 'none';
+
+  const totalCuotas = cuota * 48;
+  const totalQuedar = entradaToy + totalCuotas + vfg;
+
+  // Dinero reservado = lo que estás dispuesto a poner + valor coche - lo que pagas de entrada a Toyota
+  const reservado = Math.max(0, entradaDispuesta + valorCoche - entradaToy);
+  const vfgPendiente = Math.max(0, vfg - reservado);
+  const ahorroVFG = vfgPendiente > 0 ? vfgPendiente / 48 : 0;
+  const totalMensual = cuota + ahorroVFG;
+  const pctCubierto = vfg > 0 ? Math.min(100, (reservado / vfg) * 100) : 0;
+
+  // Banner
+  let banner = `Financias a 48 meses con cuota de <strong>${fmt(cuota)}</strong>. En el mes 49 debes pagar el VFG de <strong>${fmt(vfg)}</strong> para quedarte el coche.`;
+  if (reservado > 0) {
+    banner += ` Ya reservas <strong>${fmt(reservado)}</strong> desde el día 1 para cubrir parte del VFG.`;
+  }
+  document.getElementById('toyBanner').innerHTML = banner;
+
+  // Update DOM
+  document.getElementById('toyResumenPrecio').textContent = fmt(precio);
+  document.getElementById('toyResumenEntrada').textContent = fmt(entradaToy);
+  document.getElementById('toyTotalCuotas').textContent = fmt(totalCuotas);
+  document.getElementById('toyTotalCuotasSub').textContent = `48 × ${fmt(cuota)}`;
+  document.getElementById('toyResumenVFG').textContent = fmt(vfg);
+  document.getElementById('toyTotalQuedar').textContent = fmt(totalQuedar);
+
+  document.getElementById('toyDispuesto').textContent = fmt(entradaDispuesta);
+  document.getElementById('toyEntradaPagada').textContent = fmt(entradaToy);
+  if (cocheToggle) document.getElementById('toyValorCocheRes').textContent = fmt(valorCoche);
+  document.getElementById('toyReservado').textContent = fmt(reservado);
+  document.getElementById('toyReservadoSub').textContent = cocheToggle
+    ? `${fmt(entradaDispuesta)} + ${fmt(valorCoche)} − ${fmt(entradaToy)}`
+    : `${fmt(entradaDispuesta)} − ${fmt(entradaToy)}`;
+
+  document.getElementById('toyVFGPendiente').textContent = fmt(vfgPendiente);
+  document.getElementById('toyAhorroVFG').textContent = fmt(ahorroVFG);
+  document.getElementById('toyAhorroVFGSub').textContent = `${fmt(vfgPendiente)} ÷ 48 meses`;
+
+  document.getElementById('toyPlanCuota').textContent = fmt(cuota);
+  document.getElementById('toyPlanAhorro').textContent = fmt(ahorroVFG);
+  document.getElementById('toyPlanTotal').textContent = fmt(totalMensual);
+
+  document.getElementById('toyProgressPct').textContent = pctCubierto.toFixed(1) + '%';
+  document.getElementById('toyProgressFill').style.width = pctCubierto.toFixed(1) + '%';
+}
+
+// Toyota inputs event listeners
+document.querySelectorAll('#tab-toyota input').forEach(input => {
+  input.addEventListener('input', calcularToyota);
+  input.addEventListener('change', calcularToyota);
+});
+
 // Initial calculation
 calcular();
+calcularToyota();
 </script>
 
 </body>
