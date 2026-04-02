@@ -780,9 +780,32 @@ tbody td.cancel-col { color: var(--amber); }
               <div class="sub">VFG − reservado</div>
             </div>
             <div class="stat-box">
+              <div class="label">Dinero extra ya reservado (€)</div>
+              <input type="number" id="toyExtraReservado" value="0" step="100" min="0" style="
+                width:100%;
+                margin-top:0.3rem;
+                padding:0.6rem 0.8rem;
+                background:var(--surface-3);
+                border:1px solid var(--border);
+                border-radius:var(--radius-sm);
+                color:var(--text);
+                font-family:'JetBrains Mono',monospace;
+                font-size:0.85rem;
+                outline:none;
+              ">
+              <div class="sub" style="margin-top:0.3rem;">reduce el VFG pendiente</div>
+            </div>
+          </div>
+          <div class="stats-grid" style="margin-top:0.75rem;">
+            <div class="stat-box">
+              <div class="label">VFG restante tras extra</div>
+              <div class="value amber" id="toyVFGRestante">5.000 €</div>
+              <div class="sub" id="toyVFGRestanteSub">pendiente − extra</div>
+            </div>
+            <div class="stat-box">
               <div class="label">Ahorro mensual para VFG</div>
               <div class="value green" id="toyAhorroVFG">104,17 €</div>
-              <div class="sub" id="toyAhorroVFGSub">pendiente ÷ 48 meses</div>
+              <div class="sub" id="toyAhorroVFGSub">restante ÷ 48 meses</div>
             </div>
           </div>
 
@@ -1623,12 +1646,15 @@ function calcularToyota() {
   const totalCuotas = cuota * 48;
   const totalQuedar = entradaToy + totalCuotas + vfg;
 
+  const extraReservado = +document.getElementById('toyExtraReservado').value;
+
   // Dinero reservado = lo que estás dispuesto a poner + valor coche - lo que pagas de entrada a Toyota
   const reservado = Math.max(0, entradaDispuesta + valorCoche - entradaToy);
   const vfgPendiente = Math.max(0, vfg - reservado);
-  const ahorroVFG = vfgPendiente > 0 ? vfgPendiente / 48 : 0;
+  const vfgRestante = Math.max(0, vfgPendiente - extraReservado);
+  const ahorroVFG = vfgRestante > 0 ? vfgRestante / 48 : 0;
   const totalMensual = cuota + ahorroVFG;
-  const pctCubierto = vfg > 0 ? Math.min(100, (reservado / vfg) * 100) : 0;
+  const pctCubierto = vfg > 0 ? Math.min(100, ((reservado + extraReservado) / vfg) * 100) : 0;
 
   // Banner
   let banner = `Financias a 48 meses con cuota de <strong>${fmt(cuota)}</strong>. En el mes 49 debes pagar el VFG de <strong>${fmt(vfg)}</strong> para quedarte el coche.`;
@@ -1654,8 +1680,12 @@ function calcularToyota() {
     : `${fmt(entradaDispuesta)} − ${fmt(entradaToy)}`;
 
   document.getElementById('toyVFGPendiente').textContent = fmt(vfgPendiente);
+  document.getElementById('toyVFGRestante').textContent = fmt(vfgRestante);
+  document.getElementById('toyVFGRestanteSub').textContent = extraReservado > 0
+    ? `${fmt(vfgPendiente)} − ${fmt(extraReservado)}`
+    : `${fmt(vfgPendiente)} (sin extra)`;
   document.getElementById('toyAhorroVFG').textContent = fmt(ahorroVFG);
-  document.getElementById('toyAhorroVFGSub').textContent = `${fmt(vfgPendiente)} ÷ 48 meses`;
+  document.getElementById('toyAhorroVFGSub').textContent = `${fmt(vfgRestante)} ÷ 48 meses`;
 
   document.getElementById('toyPlanCuota').textContent = fmt(cuota);
   document.getElementById('toyPlanAhorro').textContent = fmt(ahorroVFG);
