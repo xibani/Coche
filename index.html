@@ -697,6 +697,24 @@ tbody td.cancel-col { color: var(--amber); }
             </div>
           </div>
           <hr class="divider">
+          <div class="toggle-row">
+            <span>Aplicar descuento a la cuota</span>
+            <label class="toggle">
+              <input type="checkbox" id="toyDescuentoToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="toyDescuentoFields" style="display:none; margin-top:0.5rem;">
+            <div class="field">
+              <label>Descuento conseguido (€)</label>
+              <input type="number" id="toyDescuento" value="0" step="100" min="0">
+            </div>
+            <div class="info-banner" id="toyDescuentoBanner" style="margin-bottom:0;">
+              Regla Toyota: ~<strong>26 €/mes</strong> por cada 1.000 € de descuento.
+              <span id="toyDescuentoDetalle"></span>
+            </div>
+          </div>
+          <hr class="divider">
           <div class="field">
             <label>Entrada a la que estás dispuesto (€)</label>
             <input type="number" id="toyEntradaDispuesta" value="15000" step="100">
@@ -1645,11 +1663,25 @@ function switchMainTab(tab) {
 function calcularToyota() {
   const precio = +document.getElementById('toyPrecio').value;
   const entradaToy = +document.getElementById('toyEntrada').value;
-  const cuota = +document.getElementById('toyCuota').value;
+  const cuotaBase = +document.getElementById('toyCuota').value;
   const vfg = +document.getElementById('toyVFG').value;
   const entradaDispuesta = +document.getElementById('toyEntradaDispuesta').value;
   const cocheToggle = document.getElementById('toyCocheToggle').checked;
   const valorCoche = cocheToggle ? +document.getElementById('toyValorCoche').value : 0;
+
+  // Descuento aplicado a cuota
+  const descuentoToggle = document.getElementById('toyDescuentoToggle').checked;
+  const descuento = descuentoToggle ? +document.getElementById('toyDescuento').value : 0;
+  document.getElementById('toyDescuentoFields').style.display = descuentoToggle ? 'block' : 'none';
+
+  const reduccionCuota = (descuento / 1000) * 26;
+  const cuota = Math.max(0, cuotaBase - reduccionCuota);
+
+  if (descuentoToggle) {
+    document.getElementById('toyDescuentoDetalle').innerHTML = descuento > 0
+      ? `<br>Cuota base <strong>${fmt(cuotaBase)}</strong> − <strong>${fmt(reduccionCuota)}</strong> = <strong>${fmt(cuota)}</strong>/mes`
+      : '';
+  }
 
   document.getElementById('toyCocheFields').style.display = cocheToggle ? 'block' : 'none';
   document.getElementById('toyValorCocheBox').style.display = cocheToggle ? 'flex' : 'none';
