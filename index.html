@@ -844,6 +844,24 @@ tbody td.cancel-col { color: var(--amber); }
           </div>
 
           <hr class="divider">
+          <div class="toggle-row">
+            <span>Presupuesto para imprevistos</span>
+            <label class="toggle">
+              <input type="checkbox" id="toyImprevistosToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="toyImprevistosFields" style="display:none; margin-top:0.5rem;">
+            <div id="toyImprevistosList"></div>
+            <button type="button" id="btnAddImprevisto" class="btn-add-coste">+ Añadir imprevisto</button>
+            <div class="stat-box full" style="margin-top:0.6rem;">
+              <div class="label">Total imprevistos</div>
+              <div class="value red" id="toyImprevistosTotal" style="font-size:1rem;">0,00 €</div>
+              <div class="sub" id="toyImprevistosMes">+0,00 €/mes durante 48 meses</div>
+            </div>
+          </div>
+
+          <hr class="divider">
           <div class="section-title">Esfuerzo mensual</div>
           <div class="plan-box" style="margin-top:0.5rem;">
             <div class="plan-row">
@@ -857,6 +875,10 @@ tbody td.cancel-col { color: var(--amber); }
             <div class="plan-row" style="opacity:0.5;">
               <span class="plan-label" style="font-size:0.68rem;" id="toyAhorroVFGSub">restante ÷ 48 meses</span>
               <span class="plan-value" style="font-size:0.72rem; color:var(--green);" id="toyAhorroVFG">104,17 €</span>
+            </div>
+            <div class="plan-row" id="toyPlanImprevistosRow" style="display:none;">
+              <span class="plan-label">Imprevistos</span>
+              <span class="plan-value" style="color:var(--red)" id="toyPlanImprevistos">0,00 €</span>
             </div>
             <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
               <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual</span>
@@ -1696,7 +1718,21 @@ function calcularToyota() {
   const vfgPendiente = Math.max(0, vfg - reservado);
   const vfgRestante = Math.max(0, vfgPendiente - extraReservado);
   const ahorroVFG = vfgRestante > 0 ? vfgRestante / 48 : 0;
-  const totalMensual = cuota + ahorroVFG;
+
+  // Imprevistos
+  const imprevistosToggle = document.getElementById('toyImprevistosToggle').checked;
+  document.getElementById('toyImprevistosFields').style.display = imprevistosToggle ? 'block' : 'none';
+  const totalImprevistos = imprevistosToggle
+    ? Array.from(document.querySelectorAll('.imprevisto-amount')).reduce((s, el) => s + (+el.value || 0), 0)
+    : 0;
+  const imprevistosMes = totalImprevistos / 48;
+
+  document.getElementById('toyImprevistosTotal').textContent = fmt(totalImprevistos);
+  document.getElementById('toyImprevistosMes').textContent = `+${fmt(imprevistosMes)}/mes durante 48 meses`;
+  document.getElementById('toyPlanImprevistosRow').style.display = (imprevistosToggle && totalImprevistos > 0) ? 'flex' : 'none';
+  document.getElementById('toyPlanImprevistos').textContent = fmt(imprevistosMes);
+
+  const totalMensual = cuota + ahorroVFG + imprevistosMes;
   const pctCubierto = vfg > 0 ? Math.min(100, ((reservado + extraReservado) / vfg) * 100) : 0;
 
   // Banner
@@ -1737,6 +1773,24 @@ function calcularToyota() {
   document.getElementById('toyProgressPct').textContent = pctCubierto.toFixed(1) + '%';
   document.getElementById('toyProgressFill').style.width = pctCubierto.toFixed(1) + '%';
 }
+
+// Imprevistos Toyota
+function addImprevistoRow(label = '', amount = '') {
+  const list = document.getElementById('toyImprevistosList');
+  const row = document.createElement('div');
+  row.className = 'coste-row';
+  row.innerHTML = `
+    <input type="text" class="imprevisto-label" placeholder="Ej: Cargador casa" value="${label}" style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:0.35rem 0.5rem;color:var(--text);font-size:0.85rem;">
+    <input type="number" class="imprevisto-amount" placeholder="0" value="${amount}" step="50" min="0" style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:0.35rem 0.5rem;color:var(--text);text-align:right;width:90px;font-size:0.85rem;">
+    <button type="button" class="btn-remove-coste" title="Eliminar">×</button>
+  `;
+  row.querySelector('.btn-remove-coste').addEventListener('click', () => { row.remove(); calcularToyota(); });
+  row.querySelector('.imprevisto-amount').addEventListener('input', calcularToyota);
+  list.appendChild(row);
+  calcularToyota();
+}
+
+document.getElementById('btnAddImprevisto').addEventListener('click', () => addImprevistoRow());
 
 // Toyota inputs event listeners
 document.querySelectorAll('#tab-toyota input').forEach(input => {
