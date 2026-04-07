@@ -1818,13 +1818,14 @@ function calcularToyota() {
   document.getElementById('toyPlanTotalPct').textContent = '(' + Math.ceil(totalMensual / 1790 * 100) + '%)';
 
   // Esfuerzo mensual a 12 meses
-  const ahorroCancelar12 = importeCancelar12 / 12;
+  const faltaCancelar12 = Math.max(0, importeCancelar12 - reservado - extraReservado);
+  const ahorroCancelar12 = faltaCancelar12 / 12;
   const imprevistosMes12 = totalImprevistos / 12;
   const totalMensual12 = cuota + ahorroCancelar12 + (imprevistosToggle ? imprevistosMes12 : 0);
 
   document.getElementById('toyPlan12Cuota').textContent = fmt(cuota);
   document.getElementById('toyPlan12Ahorro').textContent = fmt(ahorroCancelar12);
-  document.getElementById('toyPlan12AhorroSub').textContent = `${fmt(importeCancelar12)} ÷ 12 meses`;
+  document.getElementById('toyPlan12AhorroSub').textContent = `(${fmt(importeCancelar12)} − ${fmt(reservado + extraReservado)} reservado) ÷ 12 meses`;
   document.getElementById('toyPlan12ImprevistosRow').style.display = (imprevistosToggle && totalImprevistos > 0) ? 'flex' : 'none';
   document.getElementById('toyPlan12Imprevistos').textContent = fmt(imprevistosMes12);
   document.getElementById('toyPlan12Total').textContent = fmt(totalMensual12);
