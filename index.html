@@ -680,20 +680,20 @@ tbody td.cancel-col { color: var(--amber); }
         <div class="card-body">
           <div class="field">
             <label>Precio total del coche (€)</label>
-            <input type="number" id="toyPrecio" value="27900" step="100">
+            <input type="number" id="toyPrecio" value="26900" step="100">
           </div>
           <div class="field">
             <label>Entrada a Toyota (€)</label>
-            <input type="number" id="toyEntrada" value="13000" step="100">
+            <input type="number" id="toyEntrada" value="14500" step="100">
           </div>
           <div class="input-row">
             <div class="field">
               <label>Cuota mensual (€)</label>
-              <input type="number" id="toyCuota" value="200" step="1">
+              <input type="number" id="toyCuota" value="109.38" step="1">
             </div>
             <div class="field">
               <label>VFG — Valor Final Garantizado (€)</label>
-              <input type="number" id="toyVFG" value="12578.93" step="100">
+              <input type="number" id="toyVFG" value="12277.77" step="100">
             </div>
           </div>
           <hr class="divider">
@@ -729,7 +729,7 @@ tbody td.cancel-col { color: var(--amber); }
           <div id="toyCocheFields" style="display:none; margin-top:0.5rem;">
             <div class="field">
               <label>Valor del coche actual (€)</label>
-              <input type="number" id="toyValorCoche" value="3500" step="100">
+              <input type="number" id="toyValorCoche" value="3510" step="100">
             </div>
           </div>
         </div>
@@ -768,6 +768,14 @@ tbody td.cancel-col { color: var(--amber); }
             <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
               <span class="plan-label" style="font-weight:600; color:var(--text);">Total si te quedas el coche</span>
               <span class="plan-value" style="color:var(--red); font-size:0.95rem;" id="toyTotalQuedar">29.600,00 €</span>
+            </div>
+            <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
+              <span class="plan-label" style="font-weight:600; color:var(--green);">Si cancelas en mes 12</span>
+              <span class="plan-value" style="color:var(--green); font-size:0.95rem;" id="toyCancelar12">0,00 €</span>
+            </div>
+            <div class="plan-row" style="opacity:0.5;">
+              <span class="plan-label" style="font-size:0.68rem; padding-left:0.5rem;" id="toyCancelar12Sub">entrada + 12 cuotas + capital pendiente + 1%</span>
+              <span></span>
             </div>
           </div>
         </div>
@@ -813,7 +821,7 @@ tbody td.cancel-col { color: var(--amber); }
             </div>
             <div class="stat-box">
               <div class="label">Extra ya reservado (€)</div>
-              <input type="number" id="toyExtraReservado" value="2875.54" step="100" min="0" style="
+              <input type="number" id="toyExtraReservado" value="7144.14" step="100" min="0" style="
                 width:100%;
                 margin-top:0.3rem;
                 padding:0.5rem 0.7rem;
@@ -881,8 +889,32 @@ tbody td.cancel-col { color: var(--amber); }
               <span class="plan-value" style="color:var(--red)" id="toyPlanImprevistos">0,00 €</span>
             </div>
             <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
-              <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual</span>
+              <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual <span style="font-weight:400; color:var(--text-dim); font-size:0.7rem;">(48 meses)</span></span>
               <span class="plan-value" style="color:var(--accent); font-size:1.05rem;" id="toyPlanTotal">304,17 €</span> <span style="color:var(--text-dim); font-size:0.75rem; font-weight:500;" id="toyPlanTotalPct">(17%)</span>
+            </div>
+          </div>
+
+          <div class="section-title" style="margin-top:1rem;">Si quieres pagarlo en 12 meses</div>
+          <div class="plan-box" style="margin-top:0.5rem;">
+            <div class="plan-row">
+              <span class="plan-label">Cuota Toyota</span>
+              <span class="plan-value" id="toyPlan12Cuota">109,38 €</span>
+            </div>
+            <div class="plan-row">
+              <span class="plan-label">Ahorro para cancelar mes 12</span>
+              <span class="plan-value" style="color:var(--green)" id="toyPlan12Ahorro">0,00 €</span>
+            </div>
+            <div class="plan-row" style="opacity:0.5;">
+              <span class="plan-label" style="font-size:0.68rem;" id="toyPlan12AhorroSub">importe cancelación ÷ 12</span>
+              <span></span>
+            </div>
+            <div class="plan-row" id="toyPlan12ImprevistosRow" style="display:none;">
+              <span class="plan-label">Imprevistos</span>
+              <span class="plan-value" style="color:var(--red)" id="toyPlan12Imprevistos">0,00 €</span>
+            </div>
+            <div class="plan-row" style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
+              <span class="plan-label" style="font-weight:600; color:var(--text);">Total mensual <span style="font-weight:400; color:var(--text-dim); font-size:0.7rem;">(12 meses)</span></span>
+              <span class="plan-value" style="color:var(--accent); font-size:1.05rem;" id="toyPlan12Total">0,00 €</span> <span style="color:var(--text-dim); font-size:0.75rem; font-weight:500;" id="toyPlan12TotalPct">(0%)</span>
             </div>
           </div>
         </div>
@@ -1712,6 +1744,15 @@ function calcularToyota() {
   const totalCuotas = cuota * 48;
   const totalQuedar = entradaToy + totalCuotas + vfg;
 
+  // Cancelación mes 12: capital pendiente = financiado - amortizado en 12 cuotas
+  // Financiado = precio - entrada, cuota cubre intereses + amortización parcial (VFG queda al final)
+  // Usamos dato de referencia: capital pendiente mes 12 = 13125
+  const capitalPendiente12 = 13125;
+  const penalizacion12 = capitalPendiente12 * 0.01;
+  const importeCancelar12 = capitalPendiente12 + penalizacion12;
+  const cuotas12 = cuota * 12;
+  const totalCancelar12 = entradaToy + cuotas12 + importeCancelar12;
+
   const extraReservado = +document.getElementById('toyExtraReservado').value;
 
   // Dinero reservado = lo que estás dispuesto a poner + valor coche - lo que pagas de entrada a Toyota
@@ -1751,6 +1792,10 @@ function calcularToyota() {
   document.getElementById('toyResumenVFG').textContent = fmt(vfg);
   document.getElementById('toyTotalQuedar').textContent = fmt(totalQuedar);
 
+  // Cancelar en mes 12
+  document.getElementById('toyCancelar12').textContent = fmt(totalCancelar12);
+  document.getElementById('toyCancelar12Sub').textContent = `${fmt(entradaToy)} + 12 × ${fmt(cuota)} + ${fmt(capitalPendiente12)} + 1%`;
+
   document.getElementById('toyDispuesto').textContent = fmt(entradaDispuesta);
   document.getElementById('toyEntradaPagada').textContent = '− ' + fmt(entradaToy);
   if (cocheToggle) document.getElementById('toyValorCocheRes').textContent = fmt(valorCoche);
@@ -1771,6 +1816,19 @@ function calcularToyota() {
   document.getElementById('toyPlanAhorro').textContent = fmt(ahorroVFG);
   document.getElementById('toyPlanTotal').textContent = fmt(totalMensual);
   document.getElementById('toyPlanTotalPct').textContent = '(' + Math.ceil(totalMensual / 1790 * 100) + '%)';
+
+  // Esfuerzo mensual a 12 meses
+  const ahorroCancelar12 = importeCancelar12 / 12;
+  const imprevistosMes12 = totalImprevistos / 12;
+  const totalMensual12 = cuota + ahorroCancelar12 + (imprevistosToggle ? imprevistosMes12 : 0);
+
+  document.getElementById('toyPlan12Cuota').textContent = fmt(cuota);
+  document.getElementById('toyPlan12Ahorro').textContent = fmt(ahorroCancelar12);
+  document.getElementById('toyPlan12AhorroSub').textContent = `${fmt(importeCancelar12)} ÷ 12 meses`;
+  document.getElementById('toyPlan12ImprevistosRow').style.display = (imprevistosToggle && totalImprevistos > 0) ? 'flex' : 'none';
+  document.getElementById('toyPlan12Imprevistos').textContent = fmt(imprevistosMes12);
+  document.getElementById('toyPlan12Total').textContent = fmt(totalMensual12);
+  document.getElementById('toyPlan12TotalPct').textContent = '(' + Math.ceil(totalMensual12 / 1790 * 100) + '%)';
 
   document.getElementById('toyProgressPct').textContent = pctCubierto.toFixed(1) + '%';
   document.getElementById('toyProgressFill').style.width = pctCubierto.toFixed(1) + '%';
